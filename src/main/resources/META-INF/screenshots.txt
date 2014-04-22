@@ -1,0 +1,3 @@
+data-diff-01.png=Legend of changes and parameters of tool displayed on the top
+data-diff-02.png=Changes are highlighted with colors, new and old values displayed
+data-diff-03.png=For large data sets results are saved into file and can be downloaded

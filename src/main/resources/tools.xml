@@ -1,0 +1,26 @@
+<tools>
+    <tool id="data-diff" title="Data diff" projectTypes="inventory">
+
+        <description>Compares data in two data sources</description>
+        <parameters>
+            <parameter name="p_source_db" title="Source Database"   type="string" required="true" suggestion="project_databases" width="300" />
+            <parameter name="p_target_db" title="Target Database"   type="string" required="true" suggestion="project_databases" width="300" />
+
+            <parameter name="p_pk"        title="Compare Key"     type="string" required="true" />
+
+            <parameter name="p_target" title="Output To" type="string" required="true" defaultValue="Browser" >
+                <values>
+                    <string>Browser</string>
+                    <string>File</string>
+                </values>
+            </parameter>
+
+            <parameter name="p_limit"       title="Max Rows to Compare"     type="integer" />
+
+            <parameter name="p_source_sql" title="Source Query" type="text" required="true" width="200" height="5" />
+            <parameter name="p_target_sql" title="Target Query" type="text" required="true" width="200" height="5" />
+        </parameters>
+
+        <output  script="data_diff.groovy" type="html" />
+    </tool>
+</tools>
