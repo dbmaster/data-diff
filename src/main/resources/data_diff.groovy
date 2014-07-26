@@ -1,7 +1,3 @@
-/*
- *  File Version:  $Id: db_compare_data.groovy 160 2013-07-06 03:35:12Z schristin $
- */
-
 import java.util.*
 
 import groovy.sql.Sql
