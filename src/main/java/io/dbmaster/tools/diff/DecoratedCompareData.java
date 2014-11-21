@@ -2,6 +2,8 @@ package io.dbmaster.tools.diff;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 
@@ -12,11 +14,40 @@ class DecoratedCompareData extends CompareData{
     private static final String COLOR_CHANGED = "#FFFF80";
 
     private StringBuilder builder;
-
+    private int newCount = 0;
+    private int deletedCount = 0;
+    private int changedCount = 0;
+    private int unchagedCount = 0;
+    
+    private final boolean trim;
+    private final boolean ignoreCase;
+    
+    private final boolean newFilter;
+    private final boolean changedFilter;
+    private final boolean deletedFilter;
+    private final boolean unchagedFilter;
 
     public DecoratedCompareData(ResultSet rs1, ResultSet rs2, String compareKey,
             Long limit, Logger logger, PrintWriter printWriter) throws SQLException {
+        this(rs1, rs2, compareKey, limit, logger, printWriter, new String[0],new String[0]);
+    }
+    
+    public DecoratedCompareData(ResultSet rs1, ResultSet rs2, String compareKey,
+            Long limit, Logger logger, PrintWriter printWriter,
+            String[] outputFilters, String[] options) throws SQLException {
         super(rs1, rs2, compareKey, logger, true, printWriter, limit);
+
+        List<String> filter = Arrays.asList(outputFilters);
+        this.newFilter = filter.contains("New");
+        this.changedFilter = filter.contains("Changed");
+        this.deletedFilter = filter.contains("Deleted");
+        this.unchagedFilter = filter.contains("Same");
+        
+        List<String> option = Arrays.asList(options);
+        this.trim = option.contains("Trim");
+        this.ignoreCase = option.contains("Ignore case");
+        
+        doCompare();
     }
 
     protected void onStart(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList){
@@ -45,6 +76,10 @@ class DecoratedCompareData extends CompareData{
     }
 
     protected void markAsNew(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) {
+        newCount++;
+        if (newFilter){
+            return;
+        }
         printWriter.print("<tr style=\"background-color:");
         printWriter.print(COLOR_NEW);
         printWriter.print("\">");
@@ -72,6 +107,10 @@ class DecoratedCompareData extends CompareData{
     }
 
     protected void markAsDeleted(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) {
+        deletedCount++;
+        if (deletedFilter){
+            return;
+        }
         printWriter.print("<tr style=\"background-color:");
         printWriter.print(COLOR_DELETED);
         printWriter.print("\">");
@@ -142,10 +181,19 @@ class DecoratedCompareData extends CompareData{
         }
 
         if (equals){
+            unchagedCount++;
+            if (unchagedFilter){
+                return;
+            }
             printWriter.print("<tr>");
             printWriter.print(builder.toString());
             printWriter.print("</tr>");
+           
         } else {
+            changedCount++;
+            if (changedFilter){
+                return;
+            }
             printWriter.print("<tr style=\"background-color:");
             printWriter.print(COLOR_UPDATED);
             printWriter.print("\">");
@@ -155,6 +203,19 @@ class DecoratedCompareData extends CompareData{
     }
 
     protected void onStop(){
+        printWriter.println("</table>");
+        
+        printWriter.println("<div>Compare statistics:</div>");
+        printWriter.println("<table cellspacing=\"0\" class=\"simple-table\" border=\"1\">");
+        printWriter.println("<tr>");
+        printWriter.println("<td style=\"background-color:"+COLOR_NEW+"\">New rows " + newCount + " </td>");
+        printWriter.println("<td style=\"background-color:"+COLOR_CHANGED+"\">Changed rows " 
+                + changedCount + "</td>");
+        printWriter.println("<td style=\"background-color:"+COLOR_DELETED+"\">Deleted rows " 
+                + deletedCount + "</td>");
+        printWriter.println("<td>Same row(s) "+ unchagedCount + "</td>");
+        printWriter.println("<td>All row(s) "+ ((long)newCount+changedCount+deletedCount+unchagedCount) + "</td>");
+        printWriter.println("</tr>");
         printWriter.println("</table>");
     }
 
@@ -221,14 +282,22 @@ class DecoratedCompareData extends CompareData{
         printWriter.println("<br/>");
     }
 
-    private static boolean equalWithNull(Object obj1, Object obj2) {
+    private boolean equalWithNull(Object obj1, Object obj2) {
         if (obj1 == obj2)
             return true;
         if (obj1 == null) {
             return false;
         }
+        if (obj1 instanceof String && obj2 instanceof String){
+            if (trim){
+                obj1 = ((String) obj1).trim();
+                obj2 = ((String) obj2).trim();
+            }
+            if (ignoreCase){
+                return ((String) obj1).equalsIgnoreCase((String) obj2);
+            }
+        }
         return obj1.equals(obj2);
     }
-
 }
 

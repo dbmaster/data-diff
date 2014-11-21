@@ -62,7 +62,7 @@ if ("File".equals(p_target)) {
         PrintWriter pw = new PrintWriter(outStream)
         dbm.closeResourceOnExit(pw)
         printInfo(pw, source_server, source_database, target_server, target_database)
-        io.dbmaster.tools.diff.CompareData.executeAsync(connection1, connection2, p_source_sql, p_target_sql, p_pk, p_limit, logger, pw)
+        io.dbmaster.tools.diff.CompareData.executeAsync(connection1, connection2, p_source_sql, p_target_sql, p_pk, p_limit, logger, pw, p_output_filters, p_options)
         pw.flush();
     } finally { 
         if (outStream!=null) { 
@@ -73,7 +73,7 @@ if ("File".equals(p_target)) {
     StringWriter sw = new StringWriter(2*1024*1024)
     PrintWriter pw = new PrintWriter(sw)
     printInfo(pw, source_server, source_database, target_server, target_database)
-    io.dbmaster.tools.diff.CompareData.executeAsync(connection1, connection2, p_source_sql, p_target_sql, p_pk, p_limit, logger, pw)
+    io.dbmaster.tools.diff.CompareData.executeAsync(connection1, connection2, p_source_sql, p_target_sql, p_pk, p_limit, logger, pw, p_output_filters, p_options)
     pw.flush();
     print sw.toString()
 }

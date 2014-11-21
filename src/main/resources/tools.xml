@@ -16,6 +16,22 @@
             </parameter>
 
             <parameter name="p_limit"       title="Max Rows to Compare"     type="integer" />
+            
+            <parameter name="p_options" title="Options" type="string" required="false" multiple = "true" >
+               <values>
+                    <string>Ignore case</string>
+                    <string>Trim</string>
+                </values>
+            </parameter>
+            
+            <parameter name="p_output_filters" title="Output Filter" type="string" required="false" multiple = "true" >
+               <values>
+                    <string>New</string>
+                    <string>Changed</string>
+                    <string>Same</string>
+                    <string>Deleted</string>
+                </values>
+            </parameter>
 
             <parameter name="p_source_sql" title="Source Query" type="text" required="true" width="200" height="5" />
             <parameter name="p_target_sql" title="Target Query" type="text" required="true" width="200" height="5" />

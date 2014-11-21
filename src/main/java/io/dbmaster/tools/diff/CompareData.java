@@ -24,9 +24,14 @@ public abstract class CompareData {
     private boolean pkCompare1;
     private boolean pkCompare2;
     private int limit;
-
+    
+    private final List<ColumnMapperInfo> pkList;
+    private final List<ColumnMapperInfo> columnList;
+    private final ResultSet rs1;
+    private final ResultSet rs2;
+    
     public static void executeAsync(Connection c1, Connection c2, String sql1, String sql2, String compareKey,Long limit, Logger logger,
-            PrintWriter printWriter)
+            PrintWriter printWriter, String[] outputFilters, String[] options)
                 throws SQLException, InterruptedException{
             final CyclicBarrier barrier = new CyclicBarrier(3);
 
@@ -47,23 +52,23 @@ public abstract class CompareData {
                 throw new IllegalStateException(connector2.isException());
             }
 
-            new DecoratedCompareData(connector1.getRs(), connector2.getRs(), compareKey, limit, logger, printWriter);
+            new DecoratedCompareData(connector1.getRs(), connector2.getRs(), compareKey, limit, logger, printWriter, outputFilters, options);
     }
 
-    public static String executeAsync(Connection c1, Connection c2, String sql1, String sql2, String compareKey, Long limit, Logger logger)
+    public static String executeAsync(Connection c1, Connection c2, String sql1, String sql2, String compareKey, Long limit, Logger logger, String[] outputFilters, String[] options)
             throws SQLException, InterruptedException{
         StringWriter writer = new StringWriter(1024*1024);
         PrintWriter printWriter = new PrintWriter(writer);
-        executeAsync(c1, c2, sql1, sql2, compareKey, limit, logger, printWriter);
+        executeAsync(c1, c2, sql1, sql2, compareKey, limit, logger, printWriter, outputFilters, options);
         printWriter.flush();
         return writer.toString();
     }
 
-    public CompareData(ResultSet rs1, ResultSet rs2, String compareKey, Logger logger, boolean caseInsensitive, PrintWriter printWriter, Long limit)
+    protected CompareData(ResultSet rs1, ResultSet rs2, String compareKey, Logger logger, boolean caseInsensitive, PrintWriter printWriter, Long limit)
             throws SQLException {
         this.logger = logger;
         this.printWriter = printWriter;
-        this.limit = limit == null || limit == 0? 0: limit.intValue();
+        this.limit = limit == null || limit <= 0? Integer.MAX_VALUE: limit.intValue();
 
         List<ColumnInfo> columnList1 = getColumnInfoList(rs1.getMetaData());
         List<ColumnInfo> columnList2 = getColumnInfoList(rs2.getMetaData());
@@ -94,6 +99,13 @@ public abstract class CompareData {
             columnList.add(cmi);
         }
 
+        this.pkList = pkList;
+        this.columnList = columnList;
+        this.rs1 = rs1;
+        this.rs2 = rs2;
+    }
+    
+    protected void doCompare() throws SQLException{
         ColumnMapperInfo[] pk = pkList.toArray(new ColumnMapperInfo[pkList.size()]);
         ColumnMapperInfo[] column = columnList.toArray(new ColumnMapperInfo[columnList.size()]);
         onStart(pk, column);
