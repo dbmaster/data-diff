@@ -208,10 +208,10 @@ class DecoratedCompareData extends CompareData{
         printWriter.println("<div>Compare statistics:</div>");
         printWriter.println("<table cellspacing=\"0\" class=\"simple-table\" border=\"1\">");
         printWriter.println("<tr>");
-        printWriter.println("<td style=\"background-color:"+COLOR_NEW+"\">New rows " + newCount + " </td>");
-        printWriter.println("<td style=\"background-color:"+COLOR_CHANGED+"\">Changed rows " 
+        printWriter.println("<td style=\"background-color:"+COLOR_NEW+"\">New row(s) " + newCount + " </td>");
+        printWriter.println("<td style=\"background-color:"+COLOR_CHANGED+"\">Changed row(s) " 
                 + changedCount + "</td>");
-        printWriter.println("<td style=\"background-color:"+COLOR_DELETED+"\">Deleted rows " 
+        printWriter.println("<td style=\"background-color:"+COLOR_DELETED+"\">Deleted row(s) " 
                 + deletedCount + "</td>");
         printWriter.println("<td>Same row(s) "+ unchagedCount + "</td>");
         printWriter.println("<td>All row(s) "+ ((long)newCount+changedCount+deletedCount+unchagedCount) + "</td>");
