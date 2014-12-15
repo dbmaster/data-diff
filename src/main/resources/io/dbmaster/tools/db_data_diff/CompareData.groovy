@@ -1,7 +1,3 @@
-/*
- *  File Version:  $Id: db_compare_data.groovy 145 2013-05-22 18:10:44Z schristin $
- */
-
 package io.dbmaster.tools.db_data_diff
 
 import java.util.*
@@ -12,19 +8,19 @@ import com.branegy.dbmaster.model.*
 import com.branegy.service.connection.api.ConnectionService
 import com.branegy.dbmaster.connection.ConnectionProvider
 import org.apache.commons.io.IOUtils
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import org.slf4j.Logger;
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.sql.Connection
+import java.sql.DriverManager
+import java.sql.ResultSet
+import java.sql.ResultSetMetaData
+import java.sql.SQLException
+import java.util.ArrayList
+import java.util.Arrays
+import java.util.LinkedHashSet
+import java.util.List
+import java.util.Set
+import org.slf4j.Logger
 
 
 public class CompareData {
@@ -42,44 +38,44 @@ public class CompareData {
     protected Integer[] compareMapping
 
     public compareResultSets(ResultSet rs1, ResultSet rs2, String compareKey, logger) throws SQLException {
-        ResultSetMetaData rsmd1 = rs1.getMetaData();
-        ResultSetMetaData rsmd2 = rs2.getMetaData();
-        this.logger = logger;
+        ResultSetMetaData rsmd1 = rs1.getMetaData()
+        ResultSetMetaData rsmd2 = rs2.getMetaData()
+        this.logger = logger
 
         if (rsmd1.getColumnCount() != rsmd2.getColumnCount()) {
             throw new IllegalStateException("Column count is not equal, " + rsmd1.getColumnCount() + "/"
-                    + rsmd2.getColumnCount());
+                    + rsmd2.getColumnCount())
         }
 
         List<String> columnList1 = new ArrayList<String>();
         for (int i = 1; i <= rsmd1.getColumnCount(); ++i) {
-            columnList1.add(rsmd1.getColumnName(i));
+            columnList1.add(rsmd1.getColumnName(i))
         }
         List<String> columnList2 = new ArrayList<String>();
         for (int i = 1; i <= rsmd2.getColumnCount(); ++i) {
-            columnList2.add(rsmd2.getColumnName(i));
+            columnList2.add(rsmd2.getColumnName(i))
         }
 
         pkColumns = compareKey.split(",").collect { it.trim() }
 
         // TODO check if any column appears twice in the list
 
-        int[] pk1 = new int[pkColumns.size()];
-        int[] pk2 = new int[pkColumns.size()];
+        int[] pk1 = new int[pkColumns.size()]
+        int[] pk2 = new int[pkColumns.size()]
 
         int i = 0;
         for (String col : pkColumns) {
-            int index;
-            index = columnList1.indexOf(col);
+            int index
+            index = columnList1.indexOf(col)
             if (index == -1) {
-                throw new IllegalStateException("Column " + col + " not found in source data set");
+                throw new IllegalStateException("Column ${col} not found in source data set")
             }
-            columnList1.set(index, null);
+            columnList1.set(index, null)
             pk1[i] = index + 1;
 
-            index = columnList2.indexOf(col);
+            index = columnList2.indexOf(col)
             if (index == -1) {
-                throw new IllegalStateException("Column " + col + " not found in target data set");
+                throw new IllegalStateException("Column ${col} not found in target data set")
             }
             columnList2.set(index, null);
             pk2[i] = index + 1;

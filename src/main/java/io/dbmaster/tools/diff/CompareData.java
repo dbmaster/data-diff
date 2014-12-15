@@ -344,7 +344,13 @@ public abstract class CompareData {
     private int compare(Object pk1, Object pk2) {
         Comparable<Object> v1 = (Comparable<Object>) pk1;
         Comparable<Object> v2 = (Comparable<Object>) pk2;
-        return  v1.compareTo(v2);
+        if (v1==null && v2 == null) {
+	     return 0;
+        } else if (v1==null || v2== null) {
+             return 1;
+        } else {
+            return  v1.compareTo(v2);
+        }
     }
 
     private void read2(ResultSet rs2, ColumnMapperInfo[] columnList) throws SQLException {
