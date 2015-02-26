@@ -3,10 +3,13 @@ package io.dbmaster.tools.diff;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 import org.slf4j.Logger;
+
+import com.branegy.scripting.DbMaster;
 
 // TODO (Vitali) replace CyclicBarrier ?
 class AsynStatement extends Thread{
@@ -15,13 +18,16 @@ class AsynStatement extends Thread{
     final CyclicBarrier barrier;
     final Logger logger;
     final String name;
+    final DbMaster dbm;
 
     volatile ResultSet rs;
     volatile Exception e;
 
-    public AsynStatement(CyclicBarrier barrier, Connection connection, String sql, Logger logger, String name) {
+    public AsynStatement(CyclicBarrier barrier, Connection connection, DbMaster dbm, String sql,
+            Logger logger, String name) {
         this.barrier = barrier;
         this.connection = connection;
+        this.dbm = dbm;
         this.sql = sql;
         this.logger = logger;
         this.name = name;
@@ -30,7 +36,9 @@ class AsynStatement extends Thread{
     @Override
     public void run() {
         try {
-            rs = connection.createStatement().executeQuery(sql);
+            Statement statement = connection.createStatement();
+            dbm.closeResourceOnExit(statement);
+            rs = statement.executeQuery(sql);
             logger.info("Query " + name + " has completed");
         } catch (SQLException e) {
             this.e = e;

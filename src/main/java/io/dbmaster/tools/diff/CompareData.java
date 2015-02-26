@@ -17,6 +17,8 @@ import java.util.concurrent.CyclicBarrier;
 
 import org.slf4j.Logger;
 
+import com.branegy.scripting.DbMaster;
+
 public abstract class CompareData {
     private final Logger logger;
     protected final PrintWriter printWriter;
@@ -30,14 +32,15 @@ public abstract class CompareData {
     private final ResultSet rs1;
     private final ResultSet rs2;
     
-    public static void executeAsync(Connection c1, Connection c2, String sql1, String sql2, String compareKey,Long limit, Logger logger,
+    public static void executeAsync(DbMaster dbm, Connection c1, Connection c2, String sql1, String sql2,
+            String compareKey, Long limit, Logger logger,
             PrintWriter printWriter, String[] outputFilters, String[] options)
                 throws SQLException, InterruptedException{
             final CyclicBarrier barrier = new CyclicBarrier(3);
 
-            AsynStatement connector1 = new AsynStatement(barrier, c1, sql1, logger ,"source");
+        AsynStatement connector1 = new AsynStatement(barrier, c1, dbm, sql1, logger, "source");
             connector1.start();
-            AsynStatement connector2 = new AsynStatement(barrier, c2, sql2, logger, "target");
+        AsynStatement connector2 = new AsynStatement(barrier, c2, dbm, sql2, logger, "target");
             connector2.start();
 
             try{
@@ -55,11 +58,12 @@ public abstract class CompareData {
             new DecoratedCompareData(connector1.getRs(), connector2.getRs(), compareKey, limit, logger, printWriter, outputFilters, options);
     }
 
-    public static String executeAsync(Connection c1, Connection c2, String sql1, String sql2, String compareKey, Long limit, Logger logger, String[] outputFilters, String[] options)
+    public static String executeAsync(DbMaster dbm, Connection c1, Connection c2, String sql1, String sql2,
+            String compareKey, Long limit, Logger logger, String[] outputFilters, String[] options)
             throws SQLException, InterruptedException{
         StringWriter writer = new StringWriter(1024*1024);
         PrintWriter printWriter = new PrintWriter(writer);
-        executeAsync(c1, c2, sql1, sql2, compareKey, limit, logger, printWriter, outputFilters, options);
+        executeAsync(dbm, c1, c2, sql1, sql2, compareKey, limit, logger, printWriter, outputFilters, options);
         printWriter.flush();
         return writer.toString();
     }
