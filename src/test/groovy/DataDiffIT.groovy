@@ -17,7 +17,7 @@ public class DataDiffIT extends BaseToolTestNGCase {
                            "p_target_sql" :  getTestProperty("data-diff.p_target_sql")
                          ]
         String result = tools.toolExecutor("data-diff", parameters).execute()
-        assertTrue(result.contains("Contact"), "Unexpected search results ${result}");
-        assertTrue(result.contains("Related to"), "Unexpected search results ${result}");
+        assertTrue(result.contains("Source Database"), "Unexpected search results ${result}");
+        assertTrue(result.contains("Target Database"), "Unexpected search results ${result}");
     }
 }
