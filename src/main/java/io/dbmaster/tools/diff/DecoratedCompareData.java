@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-class DecoratedCompareData extends CompareData{
+class DecoratedCompareData extends CompareData {
     private static final String COLOR_NEW     = "#C4D79B";
     private static final String COLOR_DELETED = "rgb(249, 154, 156)";
     private static final String COLOR_UPDATED = "rgb(255, 252, 185)";
@@ -19,8 +19,6 @@ class DecoratedCompareData extends CompareData{
     private int changedCount = 0;
     private int unchagedCount = 0;
     
-    private final boolean trim;
-    private final boolean ignoreCase;
     
     private final boolean newFilter;
     private final boolean changedFilter;
@@ -29,25 +27,19 @@ class DecoratedCompareData extends CompareData{
 
     public DecoratedCompareData(ResultSet rs1, ResultSet rs2, String compareKey,
             Long limit, Logger logger, PrintWriter printWriter) throws SQLException {
-        this(rs1, rs2, compareKey, limit, logger, printWriter, new String[0],new String[0]);
+        this(rs1, rs2, compareKey, limit, logger, printWriter, new String[0]);
     }
     
     public DecoratedCompareData(ResultSet rs1, ResultSet rs2, String compareKey,
-            Long limit, Logger logger, PrintWriter printWriter,
-            String[] outputFilters, String[] options) throws SQLException {
+            Long limit, Logger logger, PrintWriter printWriter, String[] outputFilters) throws SQLException 
+	{
         super(rs1, rs2, compareKey, logger, true, printWriter, limit);
 
         List<String> filter = Arrays.asList(outputFilters);
         this.newFilter = filter.contains("New");
         this.changedFilter = filter.contains("Changed");
         this.deletedFilter = filter.contains("Deleted");
-        this.unchagedFilter = filter.contains("Same");
-        
-        List<String> option = Arrays.asList(options);
-        this.trim = option.contains("Trim");
-        this.ignoreCase = option.contains("Ignore case");
-        
-        doCompare();
+        this.unchagedFilter = filter.contains("Same");       
     }
 
     protected void onStart(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList){
@@ -66,12 +58,15 @@ class DecoratedCompareData extends CompareData{
 
         printWriter.println("<table cellspacing=\"0\" class=\"simple-table\" border=\"1\">");
         printWriter.println("<tr>");
-        for (ColumnMapperInfo pk:pkList){
+
+        for (ColumnMapperInfo pk: pkList) {
             printColumnHeader(pk, "PK: ");
         }
-        for (ColumnMapperInfo c:columnList){
+
+        for (ColumnMapperInfo c: columnList) {
             printColumnHeader(c, "");
         }
+
         printWriter.println("</tr>");
     }
 
@@ -83,99 +78,104 @@ class DecoratedCompareData extends CompareData{
         printWriter.print("<tr style=\"background-color:");
         printWriter.print(COLOR_NEW);
         printWriter.print("\">");
-        for (ColumnMapperInfo c:pkList){
+        for (ColumnMapperInfo c: pkList) {
             printWriter.println("<td>");
-            printWriter.println(c.columnB.value);
+            printWriter.println(formatValue(c.columnB.value));
             printWriter.println("</td>");
         }
-        for (ColumnMapperInfo cmi:columnList){
-            if (cmi.columnB==null){
+        for (ColumnMapperInfo cmi:columnList) {
+            if (cmi.columnB==null) {
                 // old column
                 printWriter.println("<td style=\"background-color:");
                 printWriter.println(COLOR_DELETED);
                 printWriter.println("\">");
-                printWriter.println(cmi.columnA.value);
+                printWriter.println(formatValue(cmi.columnA.value));
                 printWriter.println("</td>");
-            } else{
+            } else {
                 // normal -> new or new
                 printWriter.println("<td>");
-                printWriter.println(cmi.columnB.value);
+                printWriter.println(formatValue(cmi.columnB.value));
                 printWriter.println("</td>");
             }
         }
         printWriter.print("</tr>");
     }
 
-    protected void markAsDeleted(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) {
+    protected void markAsDeleted(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) 
+	{
         deletedCount++;
-        if (deletedFilter){
+        if (deletedFilter) {
             return;
         }
         printWriter.print("<tr style=\"background-color:");
         printWriter.print(COLOR_DELETED);
         printWriter.print("\">");
-        for (ColumnMapperInfo c:pkList){
+        for (ColumnMapperInfo c: pkList)
+		{
             printWriter.println("<td>");
-            printWriter.println(c.columnA.value);
+            printWriter.println(formatValue(c.columnA.value));
             printWriter.println("</td>");
         }
-        for (ColumnMapperInfo cmi:columnList){
+        for (ColumnMapperInfo cmi: columnList)
+		{
             if (cmi.columnA==null){
                 // new column
                 printWriter.println("<td style=\"background-color:");
                 printWriter.println(COLOR_NEW);
                 printWriter.println("\">");
-                printWriter.println(cmi.columnB.value);
+                printWriter.println(formatValue(cmi.columnB.value));
                 printWriter.println("</td>");
             } else {
                 // normal -> deleted or deleted
                 printWriter.println("<td>");
-                printWriter.println(cmi.columnA.value);
+                printWriter.println(formatValue(cmi.columnA.value));
                 printWriter.println("</td>");
             }
         }
         printWriter.print("</tr>");
     }
 
-    protected void markAsChanged(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) {
+    protected void markAsChanged(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) 
+	{
         builder.setLength(0);
-        for (ColumnMapperInfo ci:pkList){
+
+        for (ColumnMapperInfo ci: pkList) {
             builder.append("<td>");
-            builder.append(ci.columnA.value);
+            builder.append(formatValue(ci.columnA.value));
             builder.append("</td>");
         }
 
         boolean equals = true;
-        for (ColumnMapperInfo ci:columnList){
-            if (ci.columnA!=null && ci.columnB!=null){
+        for (ColumnMapperInfo ci: columnList) {
+            if (ci.columnA!=null && ci.columnB!=null) {
                 // normal
-                if (!equalWithNull(ci.columnA.value,ci.columnB.value)){
+                if (compare(ci.columnA.value, ci.columnB.value)!=0) {
                     equals = false;
                     builder.append("<td style=\"background-color:");
                     builder.append(COLOR_CHANGED);
                     builder.append("\">");
-                    builder.append(ci.columnA.value);
+                    builder.append(formatValue(ci.columnA.value));
                     builder.append(" -&gt; ");
-                    builder.append(ci.columnB.value);
+                    builder.append(formatValue(ci.columnB.value));
                     builder.append("</td>");
                 } else {
                     builder.append("<td>");
-                    builder.append(ci.columnA.value);
+                    builder.append(formatValue(ci.columnA.value));
                     builder.append("</td>");
                 }
-            } else if (ci.columnA!=null){
+            } else if (ci.columnA!=null) {
                 // deleted
                 builder.append("<td style=\"background-color:");
                 builder.append(COLOR_DELETED);
                 builder.append("\">");
-                builder.append(ci.columnA.value);
+                builder.append(formatValue(ci.columnA.value));
                 builder.append("</td>");
             } else {
                 // new
                 builder.append("<td style=\"background-color:");
                 builder.append(COLOR_NEW);
                 builder.append("\">");
-                builder.append(ci.columnB.value);
+                builder.append(formatValue(ci.columnB.value));
                 builder.append("</td>");
             }
         }
@@ -202,7 +202,8 @@ class DecoratedCompareData extends CompareData{
         }
     }
 
-    protected void onStop(){
+    protected void onStop()
+	{
         printWriter.println("</table>");
         
         printWriter.println("<div>Compare statistics:</div>");
@@ -220,7 +221,7 @@ class DecoratedCompareData extends CompareData{
     }
 
 
-    private void printColumnHeader(ColumnMapperInfo info, String prefix){
+    private void printColumnHeader(ColumnMapperInfo info, String prefix) {
         if (info.columnA!=null && info.columnB!=null){
             if (info.columnA.type!=info.columnB.type){
                 printWriter.println("<td style=\"background-color:");
@@ -281,23 +282,26 @@ class DecoratedCompareData extends CompareData{
         }
         printWriter.println("<br/>");
     }
+	
+	private Object formatValue(Object o) {
+		if (o instanceof byte[]) {
+			String HEXES = "0123456789ABCDEF";
+			// def stream = it.getBinaryStream()
+			byte[] buf = (byte[])o; // new byte[1024]
+			int n = 0;
+			final StringBuilder hex = new StringBuilder(20000);
+			hex.append("0x");
+			n = buf.length;
+			// while ((n=stream.read(buf))>=0) {
+				for (int i=0;i<n;i++) {
+					 hex.append(HEXES.charAt((buf[i] & 0xF0) >> 4)).append(HEXES.charAt((buf[i] & 0x0F)));
+				}
+			// }           
+			return hex.toString();
+		} else {
+			return o;
+		}
 
-    private boolean equalWithNull(Object obj1, Object obj2) {
-        if (obj1 == obj2)
-            return true;
-        if (obj1 == null) {
-            return false;
-        }
-        if (obj1 instanceof String && obj2 instanceof String){
-            if (trim){
-                obj1 = ((String) obj1).trim();
-                obj2 = ((String) obj2).trim();
-            }
-            if (ignoreCase){
-                return ((String) obj1).equalsIgnoreCase((String) obj2);
-            }
-        }
-        return obj1.equals(obj2);
-    }
+	}
 }
 

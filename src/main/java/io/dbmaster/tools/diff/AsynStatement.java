@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import com.branegy.scripting.DbMaster;
 
 // TODO (Vitali) replace CyclicBarrier ?
-class AsynStatement extends Thread{
+class AsynStatement extends Thread {
     final Connection connection;
     final String sql;
     final CyclicBarrier barrier;
@@ -24,7 +24,8 @@ class AsynStatement extends Thread{
     volatile Exception e;
 
     public AsynStatement(CyclicBarrier barrier, Connection connection, DbMaster dbm, String sql,
-            Logger logger, String name) {
+            Logger logger, String name) 
+	{
         this.barrier = barrier;
         this.connection = connection;
         this.dbm = dbm;
