@@ -25,7 +25,7 @@ class AsynStatement extends Thread {
 
     public AsynStatement(CyclicBarrier barrier, Connection connection, DbMaster dbm, String sql,
             Logger logger, String name) 
-	{
+    {
         this.barrier = barrier;
         this.connection = connection;
         this.dbm = dbm;

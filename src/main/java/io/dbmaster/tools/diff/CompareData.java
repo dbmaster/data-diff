@@ -383,17 +383,17 @@ public abstract class CompareData {
                     return ((String) v1).compareTo((String) v2);
                 }
             }
-			if (v1 instanceof byte[] && v2 instanceof byte[]) {
-				int l1 = ((byte[])v1).length;
-				int l2 = ((byte[])v2).length;
-				for (int i=0;i<Math.min(l1,l2);i++) {
-					int x = ((byte[])v1)[i] - ((byte[])v2)[i];
-					if (x!=0) {
-						return x;
-					}
-				}
-				return l1 - l2; // large string should go last				
-			}
+            if (v1 instanceof byte[] && v2 instanceof byte[]) {
+                int l1 = ((byte[])v1).length;
+                int l2 = ((byte[])v2).length;
+                for (int i=0;i<Math.min(l1,l2);i++) {
+                    int x = ((byte[])v1)[i] - ((byte[])v2)[i];
+                    if (x!=0) {
+                        return x;
+                    }
+                }
+                return l1 - l2; // large string should go last                
+            }
             return  ((Comparable<Object>) v1).compareTo((Comparable<Object>) v2);
         }
     }

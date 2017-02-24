@@ -32,7 +32,7 @@ class DecoratedCompareData extends CompareData {
     
     public DecoratedCompareData(ResultSet rs1, ResultSet rs2, String compareKey,
             Long limit, Logger logger, PrintWriter printWriter, String[] outputFilters) throws SQLException 
-	{
+    {
         super(rs1, rs2, compareKey, logger, true, printWriter, limit);
 
         List<String> filter = Arrays.asList(outputFilters);
@@ -102,7 +102,7 @@ class DecoratedCompareData extends CompareData {
     }
 
     protected void markAsDeleted(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) 
-	{
+    {
         deletedCount++;
         if (deletedFilter) {
             return;
@@ -111,13 +111,13 @@ class DecoratedCompareData extends CompareData {
         printWriter.print(COLOR_DELETED);
         printWriter.print("\">");
         for (ColumnMapperInfo c: pkList)
-		{
+        {
             printWriter.println("<td>");
             printWriter.println(formatValue(c.columnA.value));
             printWriter.println("</td>");
         }
         for (ColumnMapperInfo cmi: columnList)
-		{
+        {
             if (cmi.columnA==null){
                 // new column
                 printWriter.println("<td style=\"background-color:");
@@ -136,7 +136,7 @@ class DecoratedCompareData extends CompareData {
     }
 
     protected void markAsChanged(ColumnMapperInfo[] pkList, ColumnMapperInfo[] columnList) 
-	{
+    {
         builder.setLength(0);
 
         for (ColumnMapperInfo ci: pkList) {
@@ -203,7 +203,7 @@ class DecoratedCompareData extends CompareData {
     }
 
     protected void onStop()
-	{
+    {
         printWriter.println("</table>");
         
         printWriter.println("<div>Compare statistics:</div>");
@@ -282,26 +282,26 @@ class DecoratedCompareData extends CompareData {
         }
         printWriter.println("<br/>");
     }
-	
-	private Object formatValue(Object o) {
-		if (o instanceof byte[]) {
-			String HEXES = "0123456789ABCDEF";
-			// def stream = it.getBinaryStream()
-			byte[] buf = (byte[])o; // new byte[1024]
-			int n = 0;
-			final StringBuilder hex = new StringBuilder(20000);
-			hex.append("0x");
-			n = buf.length;
-			// while ((n=stream.read(buf))>=0) {
-				for (int i=0;i<n;i++) {
-					 hex.append(HEXES.charAt((buf[i] & 0xF0) >> 4)).append(HEXES.charAt((buf[i] & 0x0F)));
-				}
-			// }           
-			return hex.toString();
-		} else {
-			return o;
-		}
+    
+    private Object formatValue(Object o) {
+        if (o instanceof byte[]) {
+            String HEXES = "0123456789ABCDEF";
+            // def stream = it.getBinaryStream()
+            byte[] buf = (byte[])o; // new byte[1024]
+            int n = 0;
+            final StringBuilder hex = new StringBuilder(20000);
+            hex.append("0x");
+            n = buf.length;
+            // while ((n=stream.read(buf))>=0) {
+                for (int i=0;i<n;i++) {
+                     hex.append(HEXES.charAt((buf[i] & 0xF0) >> 4)).append(HEXES.charAt((buf[i] & 0x0F)));
+                }
+            // }           
+            return hex.toString();
+        } else {
+            return o;
+        }
 
-	}
+    }
 }
 
