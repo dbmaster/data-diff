@@ -30,11 +30,11 @@ def target_database  = p_target_db.split("\\.")[1]
 connectionSrv = dbm.getService(ConnectionService.class)
 
 connectionInfo1 = connectionSrv.findByName(source_server)
-connection1 = ConnectionProvider.getConnector(connectionInfo1).getJdbcConnection(source_database)
+connection1 = ConnectionProvider.get().getJdbcConnection(connectionInfo1,source_database)
 dbm.closeResourceOnExit(connection1)
 logger.info("Connecting to ${source_server}"+(source_database==null?"":source_database))
 connectionInfo2 = connectionSrv.findByName(target_server)
-connection2 = ConnectionProvider.getConnector(connectionInfo2).getJdbcConnection(target_database)
+connection2 = ConnectionProvider.get().getJdbcConnection(connectionInfo2,target_database)
 dbm.closeResourceOnExit(connection2)
 logger.info("Connecting to ${target_server}"+(target_database==null?"":target_database))
 

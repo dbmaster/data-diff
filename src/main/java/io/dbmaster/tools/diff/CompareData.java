@@ -350,7 +350,6 @@ public abstract class CompareData {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     private int comparePk(ColumnMapperInfo[] pkList)
     {
         for (ColumnMapperInfo cmi: pkList)

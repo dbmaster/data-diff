@@ -8,13 +8,13 @@
    <name>Data Diff</name>
    <description>Compares two data sets</description>
 
-   <version>1.3.5</version>
+   <version>1.3.6</version>
    <packaging>bundle</packaging>
 
    <parent>
-      <groupId>io.dbmaster.tools</groupId>
-      <artifactId>dbmaster-root</artifactId>
-      <version>1.11.2</version>
+       <groupId>io.dbmaster.plugins</groupId>
+       <artifactId>dbmaster-plugin-parent</artifactId>
+       <version>1.12.1</version>
    </parent>
 
    <build>
